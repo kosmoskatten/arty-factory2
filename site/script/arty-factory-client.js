@@ -1246,26 +1246,52 @@ var Prelude = require("Prelude");
 var Halogen = require("Halogen");
 var Halogen_HTML_Core = require("Halogen.HTML.Core");
 var Halogen_HTML_Indexed = require("Halogen.HTML.Indexed");
+var Halogen_HTML_Events_Indexed = require("Halogen.HTML.Events.Indexed");
 var Halogen_HTML_Properties_Indexed = require("Halogen.HTML.Properties.Indexed");
 var Halogen_HTML_Elements_Indexed = require("Halogen.HTML.Elements.Indexed");
-var Halogen_HTML = require("Halogen.HTML");
 var Halogen_HTML_Elements = require("Halogen.HTML.Elements");
+var Halogen_HTML = require("Halogen.HTML");
 var Control_Monad_Free = require("Control.Monad.Free");
+var Halogen_Query = require("Halogen.Query");
+var Halogen_HTML_Events = require("Halogen.HTML.Events");
 var Halogen_Component = require("Halogen.Component");
-var Dummy = (function () {
-    function Dummy(value0) {
+var GotoDownload = (function () {
+    function GotoDownload(value0) {
         this.value0 = value0;
     };
-    Dummy.create = function (value0) {
-        return new Dummy(value0);
+    GotoDownload.create = function (value0) {
+        return new GotoDownload(value0);
     };
-    return Dummy;
+    return GotoDownload;
 })();
-var renderNavbar = function (st) {
-    return Halogen_HTML_Elements_Indexed.nav([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("navbar"), Halogen_HTML_Core.className("navbar-inverse"), Halogen_HTML_Core.className("navbar-fixed-top") ]) ])([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("container-fluid")) ])([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("navbar-header")) ])([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("navbar-brand")), Halogen_HTML_Properties_Indexed.href("#") ])([ Halogen_HTML.text("Arty-Factory") ]) ]), Halogen_HTML_Elements.div_([ Halogen_HTML_Elements_Indexed.ul([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("nav"), Halogen_HTML_Core.className("navbar-nav") ]) ])([ Halogen_HTML_Elements_Indexed.li([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("active")) ])([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href("#") ])([ Halogen_HTML.text("Download") ]) ]), Halogen_HTML_Elements.li_([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href("#") ])([ Halogen_HTML.text("Upload") ]) ]) ]) ]) ]) ]);
+var GotoUpload = (function () {
+    function GotoUpload(value0) {
+        this.value0 = value0;
+    };
+    GotoUpload.create = function (value0) {
+        return new GotoUpload(value0);
+    };
+    return GotoUpload;
+})();
+var Download = (function () {
+    function Download() {
+
+    };
+    Download.value = new Download();
+    return Download;
+})();
+var Upload = (function () {
+    function Upload() {
+
+    };
+    Upload.value = new Upload();
+    return Upload;
+})();
+var renderDownloadPane = function (st) {
+    return Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.id_("download"), Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("container-fluid")) ])([ Halogen_HTML_Elements.p_([ Halogen_HTML.text("Hello") ]) ]);
 };
-var render = renderNavbar;
 var initialState = {
+    page: Download.value, 
     artifacts: [ {
         resourceUrl: "/storage/foo.tgz"
     }, {
@@ -1274,18 +1300,75 @@ var initialState = {
 };
 var $$eval = function (dictFunctor) {
     return function (v) {
-        return Prelude.pure(Control_Monad_Free.freeApplicative)(v.value0);
+        if (v instanceof GotoDownload) {
+            return Prelude.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (st) {
+                var $6 = {};
+                for (var $7 in st) {
+                    if (st.hasOwnProperty($7)) {
+                        $6[$7] = st[$7];
+                    };
+                };
+                $6.page = Download.value;
+                return $6;
+            }))(function () {
+                return Prelude.pure(Control_Monad_Free.freeApplicative)(v.value0);
+            });
+        };
+        if (v instanceof GotoUpload) {
+            return Prelude.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (st) {
+                var $9 = {};
+                for (var $10 in st) {
+                    if (st.hasOwnProperty($10)) {
+                        $9[$10] = st[$10];
+                    };
+                };
+                $9.page = Upload.value;
+                return $9;
+            }))(function () {
+                return Prelude.pure(Control_Monad_Free.freeApplicative)(v.value0);
+            });
+        };
+        throw new Error("Failed pattern match at ArtyFactory line 112, column 1 - line 113, column 1: " + [ v.constructor.name ]);
     };
+};
+var eqPage = new Prelude.Eq(function (v) {
+    return function (v1) {
+        if (v instanceof Download && v1 instanceof Download) {
+            return true;
+        };
+        if (v instanceof Upload && v1 instanceof Upload) {
+            return true;
+        };
+        return false;
+    };
+});
+var renderNavbar = function (st) {
+    var linkClass = function (page) {
+        var $14 = Prelude["=="](eqPage)(page)(st.page);
+        if ($14) {
+            return [ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("active")) ];
+        };
+        if (!$14) {
+            return [  ];
+        };
+        throw new Error("Failed pattern match at ArtyFactory line 84, column 7 - line 85, column 7: " + [ $14.constructor.name ]);
+    };
+    var renderLinks = [ Halogen_HTML_Elements_Indexed.li(linkClass(Download.value))([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href("#"), Halogen_HTML_Events_Indexed.onClick(Halogen_HTML_Events.input_(GotoDownload.create)) ])([ Halogen_HTML.text("Download") ]) ]), Halogen_HTML_Elements_Indexed.li(linkClass(Upload.value))([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href("#"), Halogen_HTML_Events_Indexed.onClick(Halogen_HTML_Events.input_(GotoUpload.create)) ])([ Halogen_HTML.text("Upload") ]) ]) ];
+    return Halogen_HTML_Elements_Indexed.nav([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("navbar"), Halogen_HTML_Core.className("navbar-inverse"), Halogen_HTML_Core.className("navbar-fixed-top") ]) ])([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("container-fluid")) ])([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("navbar-header")) ])([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("navbar-brand")), Halogen_HTML_Properties_Indexed.href("#") ])([ Halogen_HTML.text("Arty-Factory") ]) ]), Halogen_HTML_Elements.div_([ Halogen_HTML_Elements_Indexed.ul([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("nav"), Halogen_HTML_Core.className("navbar-nav") ]) ])(renderLinks) ]) ]) ]);
+};
+var render = function (st) {
+    return Halogen_HTML_Elements.div_([ renderNavbar(st), renderDownloadPane(st) ]);
 };
 var ui = function (dictFunctor) {
     return Halogen_Component.component(render)($$eval(dictFunctor));
 };
 module.exports = {
     ui: ui, 
-    initialState: initialState
+    initialState: initialState, 
+    eqPage: eqPage
 };
 
-},{"Control.Monad.Free":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Free/index.js","Halogen":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen/index.js","Halogen.Component":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.Component/index.js","Halogen.HTML":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML/index.js","Halogen.HTML.Core":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Core/index.js","Halogen.HTML.Elements":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Elements/index.js","Halogen.HTML.Elements.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Elements.Indexed/index.js","Halogen.HTML.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Indexed/index.js","Halogen.HTML.Properties.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Properties.Indexed/index.js","Prelude":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Prelude/index.js"}],"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Alt/index.js":[function(require,module,exports){
+},{"Control.Monad.Free":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Free/index.js","Halogen":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen/index.js","Halogen.Component":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.Component/index.js","Halogen.HTML":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML/index.js","Halogen.HTML.Core":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Core/index.js","Halogen.HTML.Elements":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Elements/index.js","Halogen.HTML.Elements.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Elements.Indexed/index.js","Halogen.HTML.Events":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events/index.js","Halogen.HTML.Events.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Indexed/index.js","Halogen.HTML.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Indexed/index.js","Halogen.HTML.Properties.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Properties.Indexed/index.js","Halogen.Query":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.Query/index.js","Prelude":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Prelude/index.js"}],"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Alt/index.js":[function(require,module,exports){
 // Generated by psc version 0.8.0.0
 "use strict";
 var Prelude = require("Prelude");
@@ -18849,7 +18932,42 @@ module.exports = {
     a: a
 };
 
-},{"Halogen.HTML.Core":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Core/index.js","Prelude":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Prelude/index.js"}],"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Handler/foreign.js":[function(require,module,exports){
+},{"Halogen.HTML.Core":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Core/index.js","Prelude":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Prelude/index.js"}],"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Forms/index.js":[function(require,module,exports){
+// Generated by psc version 0.8.0.0
+"use strict";
+var Prelude = require("Prelude");
+var Data_Either = require("Data.Either");
+var Data_Foreign = require("Data.Foreign");
+var Data_Foreign_Class = require("Data.Foreign.Class");
+var Data_Maybe = require("Data.Maybe");
+var Halogen_HTML_Core = require("Halogen.HTML.Core");
+var Halogen_HTML_Events_Handler = require("Halogen.HTML.Events.Handler");
+var Data_Foreign_Index = require("Data.Foreign.Index");
+var addForeignPropHandler = function (dictIsForeign) {
+    return function (key) {
+        return function (prop) {
+            return function (f) {
+                return Halogen_HTML_Core["handler'"](Halogen_HTML_Core.eventName(key))(function ($2) {
+                    return Data_Either.either(Prelude["const"](Prelude.pure(Halogen_HTML_Events_Handler.applicativeEventHandler)(Data_Maybe.Nothing.value)))(function ($3) {
+                        return Prelude.map(Halogen_HTML_Events_Handler.functorEventHandler)(Data_Maybe.Just.create)(f($3));
+                    })(Data_Foreign_Class.readProp(dictIsForeign)(Data_Foreign_Index.indexString)(prop)(Data_Foreign.toForeign((function (v) {
+                        return v.target;
+                    })($2))));
+                });
+            };
+        };
+    };
+};
+var onChecked = addForeignPropHandler(Data_Foreign_Class.booleanIsForeign)("change")("checked");
+var onValueChange = addForeignPropHandler(Data_Foreign_Class.stringIsForeign)("change")("value");
+var onValueInput = addForeignPropHandler(Data_Foreign_Class.stringIsForeign)("input")("value");
+module.exports = {
+    onChecked: onChecked, 
+    onValueInput: onValueInput, 
+    onValueChange: onValueChange
+};
+
+},{"Data.Either":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Either/index.js","Data.Foreign":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Foreign/index.js","Data.Foreign.Class":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Foreign.Class/index.js","Data.Foreign.Index":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Foreign.Index/index.js","Data.Maybe":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Maybe/index.js","Halogen.HTML.Core":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Core/index.js","Halogen.HTML.Events.Handler":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Handler/index.js","Prelude":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Prelude/index.js"}],"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Handler/foreign.js":[function(require,module,exports){
 /* global exports */
 "use strict";
 
@@ -18985,13 +19103,191 @@ module.exports = {
     monadEventHandler: monadEventHandler
 };
 
-},{"./foreign":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Handler/foreign.js","Control.Apply":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Apply/index.js","Control.Monad.Eff":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Eff/index.js","Control.Monad.Eff.Class":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Eff.Class/index.js","Control.Monad.Writer":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Writer/index.js","Control.Monad.Writer.Class":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Writer.Class/index.js","Control.Monad.Writer.Trans":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Writer.Trans/index.js","DOM":"/home/patrik/repos/arty-factory2/arty-factory-client/output/DOM/index.js","Data.Foldable":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Foldable/index.js","Data.Identity":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Identity/index.js","Data.Monoid":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Monoid/index.js","Data.Tuple":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Tuple/index.js","Halogen.HTML.Events.Types":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Types/index.js","Prelude":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Prelude/index.js"}],"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Types/index.js":[function(require,module,exports){
+},{"./foreign":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Handler/foreign.js","Control.Apply":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Apply/index.js","Control.Monad.Eff":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Eff/index.js","Control.Monad.Eff.Class":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Eff.Class/index.js","Control.Monad.Writer":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Writer/index.js","Control.Monad.Writer.Class":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Writer.Class/index.js","Control.Monad.Writer.Trans":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Writer.Trans/index.js","DOM":"/home/patrik/repos/arty-factory2/arty-factory-client/output/DOM/index.js","Data.Foldable":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Foldable/index.js","Data.Identity":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Identity/index.js","Data.Monoid":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Monoid/index.js","Data.Tuple":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Tuple/index.js","Halogen.HTML.Events.Types":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Types/index.js","Prelude":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Prelude/index.js"}],"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Indexed/index.js":[function(require,module,exports){
+// Generated by psc version 0.8.0.0
+"use strict";
+var Prelude = require("Prelude");
+var Unsafe_Coerce = require("Unsafe.Coerce");
+var Halogen_HTML_Events_Handler = require("Halogen.HTML.Events.Handler");
+var Halogen_HTML_Events_Types = require("Halogen.HTML.Events.Types");
+var Halogen_HTML_Properties_Indexed = require("Halogen.HTML.Properties.Indexed");
+var Halogen_HTML_Events = require("Halogen.HTML.Events");
+var Halogen_HTML_Events_Forms = require("Halogen.HTML.Events.Forms");
+var onValueInput = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events_Forms.onValueInput);
+var onValueChange = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events_Forms.onValueChange);
+var onUnload = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onUnload);
+var onSubmit = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onSubmit);
+var onSelect = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onSelect);
+var onSearch = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onSearch);
+var onScroll = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onScroll);
+var onResize = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onResize);
+var onReset = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onReset);
+var onPageShow = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onPageShow);
+var onPageHide = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onPageHide);
+var onMouseUp = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onMouseUp);
+var onMouseOver = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onMouseOver);
+var onMouseOut = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onMouseOut);
+var onMouseMove = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onMouseMove);
+var onMouseLeave = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onMouseLeave);
+var onMouseEnter = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onMouseEnter);
+var onMouseDown = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onMouseDown);
+var onLoad = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onLoad);
+var onKeyUp = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onKeyUp);
+var onKeyPress = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onKeyPress);
+var onKeyDown = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onKeyDown);
+var onInvalid = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onInvalid);
+var onInput = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onInput);
+var onHashChange = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onHashChange);
+var onFocusOut = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onFocusOut);
+var onFocusIn = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onFocusIn);
+var onFocus = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onFocus);
+var onError = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onError);
+var onDoubleClick = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onDoubleClick);
+var onContextMenu = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onContextMenu);
+var onClick = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onClick);
+var onChecked = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events_Forms.onChecked);
+var onChange = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onChange);
+var onBlur = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onBlur);
+var onBeforeUnload = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onBeforeUnload);
+var onAbort = Unsafe_Coerce.unsafeCoerce(Halogen_HTML_Events.onAbort);
+module.exports = {
+    onChecked: onChecked, 
+    onValueInput: onValueInput, 
+    onValueChange: onValueChange, 
+    onFocusOut: onFocusOut, 
+    onFocusIn: onFocusIn, 
+    onFocus: onFocus, 
+    onBlur: onBlur, 
+    onKeyUp: onKeyUp, 
+    onKeyPress: onKeyPress, 
+    onKeyDown: onKeyDown, 
+    onMouseUp: onMouseUp, 
+    onMouseOut: onMouseOut, 
+    onMouseOver: onMouseOver, 
+    onMouseMove: onMouseMove, 
+    onMouseLeave: onMouseLeave, 
+    onMouseEnter: onMouseEnter, 
+    onMouseDown: onMouseDown, 
+    onDoubleClick: onDoubleClick, 
+    onContextMenu: onContextMenu, 
+    onClick: onClick, 
+    onSubmit: onSubmit, 
+    onSelect: onSelect, 
+    onSearch: onSearch, 
+    onReset: onReset, 
+    onInvalid: onInvalid, 
+    onInput: onInput, 
+    onChange: onChange, 
+    onUnload: onUnload, 
+    onScroll: onScroll, 
+    onResize: onResize, 
+    onPageHide: onPageHide, 
+    onPageShow: onPageShow, 
+    onLoad: onLoad, 
+    onHashChange: onHashChange, 
+    onError: onError, 
+    onBeforeUnload: onBeforeUnload, 
+    onAbort: onAbort
+};
+
+},{"Halogen.HTML.Events":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events/index.js","Halogen.HTML.Events.Forms":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Forms/index.js","Halogen.HTML.Events.Handler":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Handler/index.js","Halogen.HTML.Events.Types":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Types/index.js","Halogen.HTML.Properties.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Properties.Indexed/index.js","Prelude":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Prelude/index.js","Unsafe.Coerce":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Unsafe.Coerce/index.js"}],"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Types/index.js":[function(require,module,exports){
 // Generated by psc version 0.8.0.0
 "use strict";
 var DOM_HTML_Types = require("DOM.HTML.Types");
 module.exports = {};
 
-},{"DOM.HTML.Types":"/home/patrik/repos/arty-factory2/arty-factory-client/output/DOM.HTML.Types/index.js"}],"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Indexed/index.js":[function(require,module,exports){
+},{"DOM.HTML.Types":"/home/patrik/repos/arty-factory2/arty-factory-client/output/DOM.HTML.Types/index.js"}],"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events/index.js":[function(require,module,exports){
+// Generated by psc version 0.8.0.0
+"use strict";
+var Prelude = require("Prelude");
+var Halogen_Query = require("Halogen.Query");
+var Halogen_HTML_Events_Handler = require("Halogen.HTML.Events.Handler");
+var Halogen_HTML_Events_Types = require("Halogen.HTML.Events.Types");
+var Halogen_HTML_Core = require("Halogen.HTML.Core");
+var onUnload = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("unload"));
+var onSubmit = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("submit"));
+var onSelect = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("select"));
+var onSearch = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("search"));
+var onScroll = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("scroll"));
+var onResize = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("resize"));
+var onReset = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("reset"));
+var onPageShow = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("pageshow"));
+var onPageHide = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("pagehide"));
+var onMouseUp = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("mouseup"));
+var onMouseOver = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("mouseover"));
+var onMouseOut = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("mouseout"));
+var onMouseMove = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("mousemove"));
+var onMouseLeave = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("mouseleave"));
+var onMouseEnter = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("mouseenter"));
+var onMouseDown = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("mousedown"));
+var onLoad = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("load"));
+var onKeyUp = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("keyup"));
+var onKeyPress = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("keypress"));
+var onKeyDown = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("keydown"));
+var onInvalid = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("invalid"));
+var onInput = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("input"));
+var onHashChange = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("hashchange"));
+var onFocusOut = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("focusout"));
+var onFocusIn = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("focusin"));
+var onFocus = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("focus"));
+var onError = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("error"));
+var onDoubleClick = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("dblclick"));
+var onContextMenu = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("contextmenu"));
+var onClick = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("click"));
+var onChange = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("change"));
+var onBlur = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("blur"));
+var onBeforeUnload = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("beforeunload"));
+var onAbort = Halogen_HTML_Core.handler(Halogen_HTML_Core.eventName("abort"));
+var input_ = function (f) {
+    return function (v) {
+        return Prelude.pure(Halogen_HTML_Events_Handler.applicativeEventHandler)(Halogen_Query.action(f));
+    };
+};
+var input = function (f) {
+    return function (x) {
+        return Prelude.pure(Halogen_HTML_Events_Handler.applicativeEventHandler)(Halogen_Query.action(f(x)));
+    };
+};
+module.exports = {
+    onFocusOut: onFocusOut, 
+    onFocusIn: onFocusIn, 
+    onFocus: onFocus, 
+    onBlur: onBlur, 
+    onKeyUp: onKeyUp, 
+    onKeyPress: onKeyPress, 
+    onKeyDown: onKeyDown, 
+    onMouseUp: onMouseUp, 
+    onMouseOut: onMouseOut, 
+    onMouseOver: onMouseOver, 
+    onMouseMove: onMouseMove, 
+    onMouseLeave: onMouseLeave, 
+    onMouseEnter: onMouseEnter, 
+    onMouseDown: onMouseDown, 
+    onDoubleClick: onDoubleClick, 
+    onContextMenu: onContextMenu, 
+    onClick: onClick, 
+    onSubmit: onSubmit, 
+    onSelect: onSelect, 
+    onSearch: onSearch, 
+    onReset: onReset, 
+    onInvalid: onInvalid, 
+    onInput: onInput, 
+    onChange: onChange, 
+    onUnload: onUnload, 
+    onScroll: onScroll, 
+    onResize: onResize, 
+    onPageHide: onPageHide, 
+    onPageShow: onPageShow, 
+    onLoad: onLoad, 
+    onHashChange: onHashChange, 
+    onError: onError, 
+    onBeforeUnload: onBeforeUnload, 
+    onAbort: onAbort, 
+    input_: input_, 
+    input: input
+};
+
+},{"Halogen.HTML.Core":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Core/index.js","Halogen.HTML.Events.Handler":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Handler/index.js","Halogen.HTML.Events.Types":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Types/index.js","Halogen.Query":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.Query/index.js","Prelude":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Prelude/index.js"}],"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Indexed/index.js":[function(require,module,exports){
 // Generated by psc version 0.8.0.0
 "use strict";
 var Halogen_HTML = require("Halogen.HTML");
