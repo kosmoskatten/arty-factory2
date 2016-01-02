@@ -51,31 +51,35 @@ ui = component render eval
 
 -- | The composition of the UI rendering.
 render :: State -> ComponentHTML Query
-render st = H.div_ [ renderNavbar st, renderDownloadPane st ]
+render st = 
+    H.div_ [ renderNavbar st
+           , if st.page == Download then
+                 renderDownloadPane st 
+             else
+                 renderUploadPane st
+           ]
 
 -- | Render the navigation bar.
 renderNavbar :: State -> ComponentHTML Query
 renderNavbar st =
-    H.nav
-      [ P.classes [ className "navbar"
-                  , className "navbar-inverse"
-                  , className "navbar-fixed-top"
-                  ]
-      ]
-      [ H.div
-          [ P.class_ (className "container-fluid") ]
-          [ H.div
-              [ P.class_ (className "navbar-header") ]
-              [ H.a
-                  [ P.class_ (className "navbar-brand") , P.href "#" ]
+    H.nav [ P.classes [ className "navbar"
+                      , className "navbar-inverse"
+                      , className "navbar-fixed-top"
+                      ]
+          ]
+
+      [ H.div [ P.class_ (className "container-fluid") ]
+
+          [ H.div [ P.class_ (className "navbar-header") ]
+              [ H.a [ P.class_ (className "navbar-brand") , P.href "#" ]
                   [ H.text "Arty-Factory" ]
               ]
+
           , H.div_
-              [ H.ul
-                  [ P.classes [ className "nav"
-                              , className "navbar-nav"
-                              ]
-                  ]
+              [ H.ul [ P.classes [ className "nav"
+                                 , className "navbar-nav"
+                                 ]
+                     ]
                   renderLinks
               ]
           ]
@@ -84,16 +88,17 @@ renderNavbar st =
       renderLinks :: Array (ComponentHTML Query)
       renderLinks =
           [ H.li (linkClass Download)
-              [ H.a 
-                  [ P.href "#"
-                  , E.onClick (E.input_ GotoDownload) ]
-                  [ H.text "Download" ] 
-              ]
+                 [ H.a [ P.href "#"
+                       , E.onClick (E.input_ GotoDownload) 
+                       ]
+                       [ H.text "Download" ] 
+                 ]
+
           , H.li (linkClass Upload)
-              [ H.a 
-                  [ P.href "#"
-                  , E.onClick (E.input_ GotoUpload) ]
-                  [ H.text "Upload" ] 
+                 [ H.a [ P.href "#"
+                       , E.onClick (E.input_ GotoUpload) 
+                       ]
+                       [ H.text "Upload" ] 
               ]
           ]
       linkClass page =
@@ -102,12 +107,26 @@ renderNavbar st =
           else
               []
 
-renderDownloadPane ::State -> ComponentHTML Query
+renderDownloadPane :: State -> ComponentHTML Query
 renderDownloadPane st =
-    H.div
-      [ P.id_ "download", P.class_ (className "container-fluid") ]
+    H.div [ P.classes [ className "container"
+                      , className "offset" ]
+          ]
       [ H.p_ [ H.text "Hello" ]
+      , H.p_ [ H.text "Hello" ]
+      , H.p_ [ H.text "Hello" ]
       ]
+
+renderUploadPane :: State -> ComponentHTML Query
+renderUploadPane st =
+    H.div [ P.classes [ className "container"
+                      , className "offset" ]
+          ]
+          (map (\s -> H.p_ [H.text s]) ["Sigge", "Frasse", "Nisse"])
+      --[ H.p_ [ H.text "Olleh" ]
+      --, H.p_ [ H.text "Olleh" ]
+      --, H.p_ [ H.text "Olleh" ]
+      --]
 
 eval :: forall g. (Functor g) => Natural Query (ComponentDSL State Query g)
 eval (GotoDownload next) = do

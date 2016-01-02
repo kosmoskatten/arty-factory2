@@ -1287,8 +1287,13 @@ var Upload = (function () {
     Upload.value = new Upload();
     return Upload;
 })();
+var renderUploadPane = function (st) {
+    return Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("container"), Halogen_HTML_Core.className("offset") ]) ])(Prelude.map(Prelude.functorArray)(function (s) {
+        return Halogen_HTML_Elements.p_([ Halogen_HTML.text(s) ]);
+    })([ "Sigge", "Frasse", "Nisse" ]));
+};
 var renderDownloadPane = function (st) {
-    return Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.id_("download"), Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("container-fluid")) ])([ Halogen_HTML_Elements.p_([ Halogen_HTML.text("Hello") ]) ]);
+    return Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("container"), Halogen_HTML_Core.className("offset") ]) ])([ Halogen_HTML_Elements.p_([ Halogen_HTML.text("Hello") ]), Halogen_HTML_Elements.p_([ Halogen_HTML.text("Hello") ]), Halogen_HTML_Elements.p_([ Halogen_HTML.text("Hello") ]) ]);
 };
 var initialState = {
     page: Download.value, 
@@ -1328,7 +1333,7 @@ var $$eval = function (dictFunctor) {
                 return Prelude.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
         };
-        throw new Error("Failed pattern match at ArtyFactory line 112, column 1 - line 113, column 1: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at ArtyFactory line 131, column 1 - line 132, column 1: " + [ v.constructor.name ]);
     };
 };
 var eqPage = new Prelude.Eq(function (v) {
@@ -1351,13 +1356,22 @@ var renderNavbar = function (st) {
         if (!$14) {
             return [  ];
         };
-        throw new Error("Failed pattern match at ArtyFactory line 84, column 7 - line 85, column 7: " + [ $14.constructor.name ]);
+        throw new Error("Failed pattern match at ArtyFactory line 88, column 7 - line 89, column 7: " + [ $14.constructor.name ]);
     };
     var renderLinks = [ Halogen_HTML_Elements_Indexed.li(linkClass(Download.value))([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href("#"), Halogen_HTML_Events_Indexed.onClick(Halogen_HTML_Events.input_(GotoDownload.create)) ])([ Halogen_HTML.text("Download") ]) ]), Halogen_HTML_Elements_Indexed.li(linkClass(Upload.value))([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href("#"), Halogen_HTML_Events_Indexed.onClick(Halogen_HTML_Events.input_(GotoUpload.create)) ])([ Halogen_HTML.text("Upload") ]) ]) ];
     return Halogen_HTML_Elements_Indexed.nav([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("navbar"), Halogen_HTML_Core.className("navbar-inverse"), Halogen_HTML_Core.className("navbar-fixed-top") ]) ])([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("container-fluid")) ])([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("navbar-header")) ])([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("navbar-brand")), Halogen_HTML_Properties_Indexed.href("#") ])([ Halogen_HTML.text("Arty-Factory") ]) ]), Halogen_HTML_Elements.div_([ Halogen_HTML_Elements_Indexed.ul([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("nav"), Halogen_HTML_Core.className("navbar-nav") ]) ])(renderLinks) ]) ]) ]);
 };
 var render = function (st) {
-    return Halogen_HTML_Elements.div_([ renderNavbar(st), renderDownloadPane(st) ]);
+    return Halogen_HTML_Elements.div_([ renderNavbar(st), (function () {
+        var $15 = Prelude["=="](eqPage)(st.page)(Download.value);
+        if ($15) {
+            return renderDownloadPane(st);
+        };
+        if (!$15) {
+            return renderUploadPane(st);
+        };
+        throw new Error("Failed pattern match at ArtyFactory line 53, column 1 - line 54, column 1: " + [ $15.constructor.name ]);
+    })() ]);
 };
 var ui = function (dictFunctor) {
     return Halogen_Component.component(render)($$eval(dictFunctor));
