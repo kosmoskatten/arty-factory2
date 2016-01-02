@@ -9,6 +9,7 @@ module ArtyFactory
 import Prelude
 
 import Halogen
+import Halogen.HTML.Core (className)
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Properties.Indexed as P
 
@@ -36,8 +37,39 @@ ui :: forall g. (Functor g) => Component State Query g
 ui = component render eval
 
 render :: State -> ComponentHTML Query
-render st =
-    H.p_ [ H.text "Hej hopp" ]
+render = renderNavbar
+
+renderNavbar :: State -> ComponentHTML Query
+renderNavbar st =
+    H.nav
+      [ P.classes [ className "navbar"
+                  , className "navbar-inverse"
+                  , className "navbar-fixed-top"
+                  ]
+      ]
+      [ H.div
+          [ P.class_ (className "container-fluid") ]
+          [ H.div
+              [ P.class_ (className "navbar-header") ]
+              [ H.a
+                  [ P.class_ (className "navbar-brand") , P.href "#" ]
+                  [ H.text "Arty-Factory" ]
+              ]
+          , H.div_
+              [ H.ul
+                  [ P.classes [ className "nav"
+                              , className "navbar-nav"
+                              ]
+                  ]
+                  [ H.li
+                      [ P.class_ (className "active") ]
+                      [ H.a [ P.href "#" ] [ H.text "Download" ] ]
+                  , H.li_
+                      [ H.a [ P.href "#" ] [ H.text "Upload" ] ]
+                  ]
+              ]
+          ]
+      ]
 
 eval :: forall g. (Functor g) => Natural Query (ComponentDSL State Query g)
 eval (Dummy next) = pure next
