@@ -1,0 +1,7 @@
+*.swp
+*~
+
+.stack-work/
+
+arty-factory-client/node_modules/
+arty-factory-client/bower_components/

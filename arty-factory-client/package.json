@@ -1,0 +1,7 @@
+{
+  "name": "arty-factory",
+  "license": "MIT",
+  "dependencies": {
+    "virtual-dom": "^2.0.1"
+  }
+}
