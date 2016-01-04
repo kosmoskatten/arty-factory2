@@ -1292,48 +1292,68 @@ var renderUploadPane = function (st) {
         return Halogen_HTML_Elements.p_([ Halogen_HTML.text(s) ]);
     })([ "Sigge", "Frasse", "Nisse" ]));
 };
+var renderStar = function (star) {
+    return Halogen_HTML_Elements_Indexed.span([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("glyphicon"), Halogen_HTML_Core.className(star) ]) ])([  ]);
+};
+var renderRating = function (v) {
+    if (v === 0) {
+        return Halogen_HTML_Elements_Indexed.td([ Halogen_HTML_Properties_Indexed.title("0 of 3") ])(Prelude.map(Prelude.functorArray)(renderStar)([ "glyphicon-star-empty", "glyphicon-star-empty", "glyphicon-star-empty" ]));
+    };
+    if (v === 1) {
+        return Halogen_HTML_Elements_Indexed.td([ Halogen_HTML_Properties_Indexed.title("1 of 3") ])(Prelude.map(Prelude.functorArray)(renderStar)([ "glyphicon-star", "glyphicon-star-empty", "glyphicon-star-empty" ]));
+    };
+    if (v === 2) {
+        return Halogen_HTML_Elements_Indexed.td([ Halogen_HTML_Properties_Indexed.title("2 of 3") ])(Prelude.map(Prelude.functorArray)(renderStar)([ "glyphicon-star", "glyphicon-star", "glyphicon-star-empty" ]));
+    };
+    return Halogen_HTML_Elements_Indexed.td([ Halogen_HTML_Properties_Indexed.title("3 of 3") ])(Prelude.map(Prelude.functorArray)(renderStar)([ "glyphicon-star", "glyphicon-star", "glyphicon-star" ]));
+};
+var renderTableEntry = function (art) {
+    return Halogen_HTML_Elements.tr_([ Halogen_HTML_Elements.td_([ Halogen_HTML.text(art.resourceUrl) ]), Halogen_HTML_Elements.td_([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href(art.resourceUrl) ])([ Halogen_HTML_Elements_Indexed.span([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("glyphicon"), Halogen_HTML_Core.className("glyphicon-download") ]), Halogen_HTML_Properties_Indexed.title("Download " + art.resourceUrl) ])([  ]) ]) ]), renderRating(art.rating), Halogen_HTML_Elements.td_([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href("#") ])([ Halogen_HTML_Elements_Indexed.span([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("glyphicon"), Halogen_HTML_Core.className("glyphicon-thumbs-up") ]), Halogen_HTML_Properties_Indexed.title("Vote for artifact") ])([  ]) ]) ]) ]);
+};
 var renderDownloadPane = function (st) {
-    return Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("container"), Halogen_HTML_Core.className("offset") ]) ])([ Halogen_HTML_Elements.p_([ Halogen_HTML.text("Hello") ]), Halogen_HTML_Elements.p_([ Halogen_HTML.text("Hello") ]), Halogen_HTML_Elements.p_([ Halogen_HTML.text("Hello") ]) ]);
+    return Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("container"), Halogen_HTML_Core.className("offset") ]) ])([ Halogen_HTML_Elements.h2_([ Halogen_HTML.text("Available artifacts") ]), Halogen_HTML_Elements_Indexed.table([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("table"), Halogen_HTML_Core.className("table-striped") ]) ])([ Halogen_HTML_Elements.thead_([ Halogen_HTML_Elements.tr_([ Halogen_HTML_Elements.th_([ Halogen_HTML.text("URL") ]), Halogen_HTML_Elements.th_([ Halogen_HTML.text("Download") ]), Halogen_HTML_Elements.th_([ Halogen_HTML.text("Rating") ]), Halogen_HTML_Elements.th_([ Halogen_HTML.text("Vote Up") ]) ]) ]), Halogen_HTML_Elements.tbody_(Prelude.map(Prelude.functorArray)(renderTableEntry)(st.artifacts)) ]) ]);
 };
 var initialState = {
     page: Download.value, 
     artifacts: [ {
-        resourceUrl: "/storage/foo.tgz"
+        resourceUrl: "/storage/foo.tgz", 
+        rating: 0
     }, {
-        resourceUrl: "/storage/bar.tgz"
+        resourceUrl: "/storage/bar.tgz", 
+        rating: 2
     } ]
 };
 var $$eval = function (dictFunctor) {
     return function (v) {
         if (v instanceof GotoDownload) {
             return Prelude.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (st) {
-                var $6 = {};
-                for (var $7 in st) {
-                    if (st.hasOwnProperty($7)) {
-                        $6[$7] = st[$7];
+                var $8 = {};
+                for (var $9 in st) {
+                    if (st.hasOwnProperty($9)) {
+                        $8[$9] = st[$9];
                     };
                 };
-                $6.page = Download.value;
-                return $6;
+                $8.page = Download.value;
+                return $8;
             }))(function () {
                 return Prelude.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
         };
         if (v instanceof GotoUpload) {
             return Prelude.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (st) {
-                var $9 = {};
-                for (var $10 in st) {
-                    if (st.hasOwnProperty($10)) {
-                        $9[$10] = st[$10];
+                var $11 = {};
+                for (var $12 in st) {
+                    if (st.hasOwnProperty($12)) {
+                        $11[$12] = st[$12];
                     };
                 };
-                $9.page = Upload.value;
-                return $9;
+                $11.page = Upload.value;
+                return $11;
             }))(function () {
                 return Prelude.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
         };
-        throw new Error("Failed pattern match at ArtyFactory line 131, column 1 - line 132, column 1: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at ArtyFactory line 203, column 1 - line 204, column 1: " + [ v.constructor.name ]);
     };
 };
 var eqPage = new Prelude.Eq(function (v) {
@@ -1349,28 +1369,28 @@ var eqPage = new Prelude.Eq(function (v) {
 });
 var renderNavbar = function (st) {
     var linkClass = function (page) {
-        var $14 = Prelude["=="](eqPage)(page)(st.page);
-        if ($14) {
+        var $16 = Prelude["=="](eqPage)(page)(st.page);
+        if ($16) {
             return [ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("active")) ];
         };
-        if (!$14) {
+        if (!$16) {
             return [  ];
         };
-        throw new Error("Failed pattern match at ArtyFactory line 88, column 7 - line 89, column 7: " + [ $14.constructor.name ]);
+        throw new Error("Failed pattern match at ArtyFactory line 94, column 7 - line 95, column 7: " + [ $16.constructor.name ]);
     };
     var renderLinks = [ Halogen_HTML_Elements_Indexed.li(linkClass(Download.value))([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href("#"), Halogen_HTML_Events_Indexed.onClick(Halogen_HTML_Events.input_(GotoDownload.create)) ])([ Halogen_HTML.text("Download") ]) ]), Halogen_HTML_Elements_Indexed.li(linkClass(Upload.value))([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href("#"), Halogen_HTML_Events_Indexed.onClick(Halogen_HTML_Events.input_(GotoUpload.create)) ])([ Halogen_HTML.text("Upload") ]) ]) ];
     return Halogen_HTML_Elements_Indexed.nav([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("navbar"), Halogen_HTML_Core.className("navbar-inverse"), Halogen_HTML_Core.className("navbar-fixed-top") ]) ])([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("container-fluid")) ])([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("navbar-header")) ])([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("navbar-brand")), Halogen_HTML_Properties_Indexed.href("#") ])([ Halogen_HTML.text("Arty-Factory") ]) ]), Halogen_HTML_Elements.div_([ Halogen_HTML_Elements_Indexed.ul([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("nav"), Halogen_HTML_Core.className("navbar-nav") ]) ])(renderLinks) ]) ]) ]);
 };
 var render = function (st) {
     return Halogen_HTML_Elements.div_([ renderNavbar(st), (function () {
-        var $15 = Prelude["=="](eqPage)(st.page)(Download.value);
-        if ($15) {
+        var $17 = Prelude["=="](eqPage)(st.page)(Download.value);
+        if ($17) {
             return renderDownloadPane(st);
         };
-        if (!$15) {
+        if (!$17) {
             return renderUploadPane(st);
         };
-        throw new Error("Failed pattern match at ArtyFactory line 53, column 1 - line 54, column 1: " + [ $15.constructor.name ]);
+        throw new Error("Failed pattern match at ArtyFactory line 59, column 1 - line 60, column 1: " + [ $17.constructor.name ]);
     })() ]);
 };
 var ui = function (dictFunctor) {

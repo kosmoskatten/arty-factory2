@@ -24,7 +24,9 @@ instance eqPage :: Eq Page where
 
 -- | The record for one artifact.
 type Artifact
-    = { resourceUrl :: String }
+    = { resourceUrl :: String
+      , rating      :: Int
+      }
 
 -- | The state for the Arty-Factory.
 type State
@@ -40,8 +42,12 @@ data Query a
 -- | The initial - empty - state for the ArtyFactory.
 initialState :: State
 initialState = { page: Download
-               , artifacts: [ { resourceUrl: "/storage/foo.tgz" }
-                            , { resourceUrl: "/storage/bar.tgz" }
+               , artifacts: [ { resourceUrl: "/storage/foo.tgz"
+                              , rating: 0 
+                              }
+                            , { resourceUrl: "/storage/bar.tgz"
+                              , rating: 2
+                              }
                             ]
                }
 
@@ -109,13 +115,79 @@ renderNavbar st =
 
 renderDownloadPane :: State -> ComponentHTML Query
 renderDownloadPane st =
+    -- TODO: Why is the offset needed?
     H.div [ P.classes [ className "container"
                       , className "offset" ]
           ]
-      [ H.p_ [ H.text "Hello" ]
-      , H.p_ [ H.text "Hello" ]
-      , H.p_ [ H.text "Hello" ]
+      [ H.h2_ [ H.text "Available artifacts" ]
+      , H.table [ P.classes [ className "table"
+                            , className "table-striped"
+                            ]
+                ]
+          [ H.thead_
+              [ H.tr_ 
+                  [ H.th_ [ H.text "URL" ]
+                  , H.th_ [ H.text "Download" ]
+                  , H.th_ [ H.text "Rating" ]
+                  , H.th_ [ H.text "Vote Up" ]
+                  ]
+              ]
+          , H.tbody_ $ map renderTableEntry st.artifacts
+          ]
       ]
+
+renderTableEntry :: Artifact -> ComponentHTML Query
+renderTableEntry art =
+    H.tr_
+      [ H.td_ [ H.text art.resourceUrl ]
+      -- | TODO: Add the download attribute in Halogen.
+      , H.td_ [ H.a [ P.href art.resourceUrl ]
+                    [ H.span [ P.classes [ className "glyphicon"
+                                         , className "glyphicon-download"
+                                         ]
+                             , P.title $ "Download " ++ art.resourceUrl
+                             ] []
+                    ]
+              ]
+      , renderRating art.rating
+      , H.td_ [ H.a [ P.href "#" ]
+                    [ H.span [ P.classes [ className "glyphicon"
+                                         , className "glyphicon-thumbs-up"
+                                         ]
+                             , P.title "Vote for artifact"
+                             ] []
+                    ]
+              ]
+      ]
+
+renderRating :: Int -> ComponentHTML Query
+renderRating 0 =
+    H.td [ P.title "0 of 3" ] $ map renderStar [ "glyphicon-star-empty"
+                                               , "glyphicon-star-empty"
+                                               , "glyphicon-star-empty"
+                                               ]
+renderRating 1 =
+    H.td [ P.title "1 of 3" ] $ map renderStar [ "glyphicon-star"
+                                               , "glyphicon-star-empty"
+                                               , "glyphicon-star-empty"
+                                               ]
+renderRating 2 =
+    H.td [ P.title "2 of 3" ] $ map renderStar [ "glyphicon-star"
+                                               , "glyphicon-star"
+                                               , "glyphicon-star-empty"
+                                               ]
+renderRating _ =
+    H.td [ P.title "3 of 3" ] $ map renderStar [ "glyphicon-star"
+                                               , "glyphicon-star"
+                                               , "glyphicon-star"
+                                               ]
+
+renderStar :: String -> ComponentHTML Query
+renderStar star =
+    H.span [ P.classes [ className "glyphicon"
+                       , className star
+                       ]
+           ] []
 
 renderUploadPane :: State -> ComponentHTML Query
 renderUploadPane st =
