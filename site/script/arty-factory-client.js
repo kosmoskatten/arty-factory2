@@ -1353,7 +1353,7 @@ var $$eval = function (dictFunctor) {
                 return Prelude.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
         };
-        throw new Error("Failed pattern match at ArtyFactory line 203, column 1 - line 204, column 1: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at ArtyFactory line 224, column 1 - line 225, column 1: " + [ v.constructor.name ]);
     };
 };
 var eqPage = new Prelude.Eq(function (v) {
@@ -1368,29 +1368,39 @@ var eqPage = new Prelude.Eq(function (v) {
     };
 });
 var renderNavbar = function (st) {
-    var linkClass = function (page) {
-        var $16 = Prelude["=="](eqPage)(page)(st.page);
+    var maybeRenderRefresh = (function () {
+        var $16 = Prelude["=="](eqPage)(st.page)(Download.value);
         if ($16) {
-            return [ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("active")) ];
+            return [ Halogen_HTML_Elements_Indexed.ul([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("nav"), Halogen_HTML_Core.className("navbar-nav"), Halogen_HTML_Core.className("navbar-right") ]) ])([ Halogen_HTML_Elements.li_([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href("#") ])([ Halogen_HTML_Elements_Indexed.span([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("glyphicon"), Halogen_HTML_Core.className("glyphicon-refresh") ]) ])([  ]) ]) ]) ]) ];
         };
         if (!$16) {
             return [  ];
         };
         throw new Error("Failed pattern match at ArtyFactory line 94, column 7 - line 95, column 7: " + [ $16.constructor.name ]);
+    })();
+    var linkClass = function (page) {
+        var $17 = Prelude["=="](eqPage)(page)(st.page);
+        if ($17) {
+            return [ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("active")) ];
+        };
+        if (!$17) {
+            return [  ];
+        };
+        throw new Error("Failed pattern match at ArtyFactory line 69, column 1 - line 70, column 1: " + [ $17.constructor.name ]);
     };
     var renderLinks = [ Halogen_HTML_Elements_Indexed.li(linkClass(Download.value))([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href("#"), Halogen_HTML_Events_Indexed.onClick(Halogen_HTML_Events.input_(GotoDownload.create)) ])([ Halogen_HTML.text("Download") ]) ]), Halogen_HTML_Elements_Indexed.li(linkClass(Upload.value))([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href("#"), Halogen_HTML_Events_Indexed.onClick(Halogen_HTML_Events.input_(GotoUpload.create)) ])([ Halogen_HTML.text("Upload") ]) ]) ];
-    return Halogen_HTML_Elements_Indexed.nav([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("navbar"), Halogen_HTML_Core.className("navbar-inverse"), Halogen_HTML_Core.className("navbar-fixed-top") ]) ])([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("container-fluid")) ])([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("navbar-header")) ])([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("navbar-brand")), Halogen_HTML_Properties_Indexed.href("#") ])([ Halogen_HTML.text("Arty-Factory") ]) ]), Halogen_HTML_Elements.div_([ Halogen_HTML_Elements_Indexed.ul([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("nav"), Halogen_HTML_Core.className("navbar-nav") ]) ])(renderLinks) ]) ]) ]);
+    return Halogen_HTML_Elements_Indexed.nav([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("navbar"), Halogen_HTML_Core.className("navbar-inverse"), Halogen_HTML_Core.className("navbar-fixed-top") ]) ])([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("container-fluid")) ])([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("navbar-header")) ])([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("navbar-brand")), Halogen_HTML_Properties_Indexed.href("#") ])([ Halogen_HTML.text("Arty-Factory") ]) ]), Halogen_HTML_Elements.div_(Prelude["++"](Prelude.semigroupArray)([ Halogen_HTML_Elements_Indexed.ul([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("nav"), Halogen_HTML_Core.className("navbar-nav") ]) ])(renderLinks) ])(maybeRenderRefresh)) ]) ]);
 };
 var render = function (st) {
     return Halogen_HTML_Elements.div_([ renderNavbar(st), (function () {
-        var $17 = Prelude["=="](eqPage)(st.page)(Download.value);
-        if ($17) {
+        var $18 = Prelude["=="](eqPage)(st.page)(Download.value);
+        if ($18) {
             return renderDownloadPane(st);
         };
-        if (!$17) {
+        if (!$18) {
             return renderUploadPane(st);
         };
-        throw new Error("Failed pattern match at ArtyFactory line 59, column 1 - line 60, column 1: " + [ $17.constructor.name ]);
+        throw new Error("Failed pattern match at ArtyFactory line 59, column 1 - line 60, column 1: " + [ $18.constructor.name ]);
     })() ]);
 };
 var ui = function (dictFunctor) {

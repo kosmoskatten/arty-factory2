@@ -81,13 +81,13 @@ renderNavbar st =
                   [ H.text "Arty-Factory" ]
               ]
 
-          , H.div_
+          , H.div_ $
               [ H.ul [ P.classes [ className "nav"
                                  , className "navbar-nav"
                                  ]
                      ]
                   renderLinks
-              ]
+              ] ++ maybeRenderRefresh
           ]
       ]
     where
@@ -112,6 +112,27 @@ renderNavbar st =
               [ P.class_ (className "active") ]
           else
               []
+      maybeRenderRefresh :: Array (ComponentHTML Query)
+      maybeRenderRefresh =
+        if st.page == Download then
+          [ H.ul [ P.classes [ className "nav"
+                             , className "navbar-nav"
+                             , className "navbar-right"
+                             ]
+                 ]
+                 [ H.li_
+                     [ H.a [ P.href "#" ]
+                       [ H.span [ P.classes [ className "glyphicon"
+                                             , className "glyphicon-refresh"
+                                              ]
+                                ]
+                                []
+                        ]
+                     ]
+                 ]
+          ]
+        else
+          []
 
 renderDownloadPane :: State -> ComponentHTML Query
 renderDownloadPane st =
