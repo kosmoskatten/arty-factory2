@@ -17,10 +17,13 @@ cabal-version:       >=1.10
 
 executable arty-factory-server
   main-is:             Main.hs
-  -- other-modules:       
+  other-modules:       Artifact
+                       Context
   -- other-extensions:    
   build-depends:       base >=4.8 && <4.9
                      , aeson
+                     , bytestring
+                     , containers
                      , hive
                      , text
   hs-source-dirs:      src
