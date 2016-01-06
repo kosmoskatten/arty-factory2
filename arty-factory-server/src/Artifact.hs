@@ -1,7 +1,11 @@
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Artifact
     ( Artifact (..)
     , ArtiMap
+    , member
+    , toList
+    , update
     , metaDataFP
     , writeMetadata
     , readMetadata
@@ -19,6 +23,7 @@ import GHC.Generics (Generic)
 
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.Map.Lazy as Map
+import qualified Data.Text as T
 
 -- | Aeson instances
 instance ToJSON Artifact where
@@ -30,17 +35,26 @@ type ArtiMap = Map Text Artifact
 -- | Data structure representing one artifact.
 data Artifact
     = Artifact
-      { artId       :: !Text
+      { storageUrl  :: !Text
       , resourceUrl :: !Text
       , rating      :: !Int
       }
     deriving (Generic, Show)
 
+member :: Text -> ArtiMap -> Bool
+member = Map.member
+
+toList :: ArtiMap -> [Artifact]
+toList = Map.elems
+
+update :: (Artifact -> Maybe Artifact) -> Text -> ArtiMap -> ArtiMap
+update = Map.update
+
 metaDataFP :: FilePath -> FilePath
 metaDataFP dir = dir ++ "/" ++ "data.json"
 
 writeMetadata :: FilePath -> ArtiMap -> IO ()
-writeMetadata file = LBS.writeFile file . encode . Map.elems
+writeMetadata file = LBS.writeFile file . encode . toList
 
 readMetadata :: FilePath -> IO (Either String ArtiMap)
 readMetadata file = do
@@ -52,4 +66,4 @@ readMetadata file = do
       Left  e -> return (Left e)
 
 toPairs :: [Artifact] -> [(Text, Artifact)]
-toPairs = map (\a -> (artId a, a))
+toPairs = map (\a -> (last $ T.splitOn "/" (resourceUrl a), a))
