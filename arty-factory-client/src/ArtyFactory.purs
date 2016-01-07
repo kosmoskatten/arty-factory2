@@ -13,6 +13,7 @@ import Prelude
 import Control.Monad.Aff (Aff ())
 import Data.Array (reverse, sortBy)
 import Data.Either (Either (..))
+import Data.Maybe (Maybe (..))
 import Data.Foreign
 import Data.Foreign.Class
 
@@ -65,6 +66,7 @@ instance eqPage :: Eq Page where
 -- | The state for the Arty-Factory.
 type State
     = { page      :: Page
+      , errMsg    :: Maybe String
       , artifacts :: Array Artifact
       }
 
@@ -74,10 +76,12 @@ data Query a
     | GotoUpload a
     | Refresh a
     | VoteUp String a
+    | CloseErrMsg a
 
 -- | The initial - empty - state for the ArtyFactory.
 initialState :: State
 initialState = { page: Download
+               , errMsg: Nothing
                , artifacts: []
                }
 
@@ -171,7 +175,8 @@ renderDownloadPane st =
     -- TODO: Why is the offset needed?
     H.div [ P.classes [ className "container"
                       , className "offset" ]
-          ]
+          ] $
+      maybeRenderErrMsg st ++
       [ H.h2_ [ H.text "Available artifacts" ]
       , H.table [ P.classes [ className "table"
                             , className "table-striped"
@@ -188,6 +193,26 @@ renderDownloadPane st =
           , H.tbody_ $ map renderTableEntry st.artifacts
           ]
       ]
+
+maybeRenderErrMsg :: State -> Array (ComponentHTML Query)
+maybeRenderErrMsg st =
+    case st.errMsg of
+        Just errMsg ->
+          [ H.div [ P.classes [ className "alert"
+                              , className "alert-danger"
+                              , className "offset"
+                              ]
+                  ]
+                  [ H.a [ P.href "#"
+                        , P.class_ $ className "close"
+                        , E.onClick (E.input_ CloseErrMsg)
+                        ]
+                        [ H.text "✖" ]
+                  , H.strong_ [ H.text "Error! " ]
+                  , H.text errMsg
+                  ]
+          ]
+        Nothing     -> []
 
 renderTableEntry :: Artifact -> ComponentHTML Query
 renderTableEntry (Artifact art) =
@@ -268,14 +293,21 @@ eval (Refresh next) = do
         Right artifacts -> do
           modify $ \st -> st { artifacts = sortByRating artifacts }
           pure next
-        _               -> pure next
+        Left err        -> do
+          modify $ \st -> st { errMsg = Just err }
+          pure next
 eval (VoteUp resourceUrl next) = do
     result <- liftAff' (voteUpArtifact resourceUrl)
     case result of
         Right artifacts -> do
           modify $ \st -> st { artifacts = sortByRating artifacts }
           pure next
-        _               -> pure next
+        Left err        -> do
+          modify $ \st -> st { errMsg = Just err }
+          pure next
+eval (CloseErrMsg next) = do
+    modify $ \st -> st { errMsg = Nothing }
+    pure next
 
 refreshArtifacts :: forall eff. Aff (ajax :: AJAX | eff) 
                         (Either String (Array Artifact))
