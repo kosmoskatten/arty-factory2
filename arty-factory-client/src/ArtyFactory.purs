@@ -15,13 +15,20 @@ import Data.Either (Either (..))
 import Data.Foreign
 import Data.Foreign.Class
 
-import Halogen (ComponentHTML, ComponentDSL, HalogenEffects, Component, Natural, component, modify, liftAff')
+import Halogen ( ComponentHTML
+               , ComponentDSL
+               , HalogenEffects
+               , Component, Natural
+               , component
+               , modify
+               , liftAff'
+               )
 import Halogen.HTML.Core (className)
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Events.Indexed as E
 import Halogen.HTML.Properties.Indexed as P
 
-import Network.HTTP.Affjax (AJAX (), get)
+import Network.HTTP.Affjax (AJAX (), get, put)
 
 --import Artifact (Artifact (..))
 
@@ -65,6 +72,7 @@ data Query a
     = GotoDownload a
     | GotoUpload a
     | Refresh a
+    | VoteUp String a
 
 -- | The initial - empty - state for the ArtyFactory.
 initialState :: State
@@ -142,10 +150,12 @@ renderNavbar st =
                              ]
                  ]
                  [ H.li_
-                     [ H.a [ P.href "#" ]
+                     [ H.a [ P.href "#"
+                           , E.onClick (E.input_ Refresh) 
+                           ]
                        [ H.span [ P.classes [ className "glyphicon"
-                                             , className "glyphicon-refresh"
-                                              ]
+                                            , className "glyphicon-refresh"
+                                            ]
                                 ]
                                 []
                         ]
@@ -183,7 +193,7 @@ renderTableEntry (Artifact art) =
     H.tr_
       [ H.td_ [ H.text art.storageUrl ]
       -- | TODO: Add the download attribute in Halogen.
-      , H.td_ [ H.a [ P.href art.resourceUrl ]
+      , H.td_ [ H.a [ P.href art.storageUrl ]
                     [ H.span [ P.classes [ className "glyphicon"
                                          , className "glyphicon-download"
                                          ]
@@ -192,7 +202,9 @@ renderTableEntry (Artifact art) =
                     ]
               ]
       , renderRating art.rating
-      , H.td_ [ H.a [ P.href "#" ]
+      , H.td_ [ H.a [ P.href "#"
+                    , E.onClick (E.input_ (VoteUp art.resourceUrl))
+                    ]
                     [ H.span [ P.classes [ className "glyphicon"
                                          , className "glyphicon-thumbs-up"
                                          ]
@@ -255,13 +267,30 @@ eval (Refresh next) = do
         Right artifacts -> do
           modify $ \st -> st { artifacts = artifacts }
           pure next
-        _              -> pure next
+        _               -> pure next
+eval (VoteUp resourceUrl next) = do
+    result <- liftAff' (voteUpArtifact resourceUrl)
+    case result of
+        Right artifacts -> do
+          modify $ \st -> st { artifacts = artifacts }
+          pure next
+        _               -> pure next
 
-refreshArtifacts :: forall eff. Aff (ajax :: AJAX | eff) (Either String (Array Artifact))
+refreshArtifacts :: forall eff. Aff (ajax :: AJAX | eff) 
+                        (Either String (Array Artifact))
 refreshArtifacts = do
     result <- get "/artifact"
     let reply = result.response
     case readJSON reply of
         Right artifacts -> return (Right artifacts)
         Left _          -> return (Left "An error occurred")
+
+voteUpArtifact :: forall eff. String
+               -> Aff (ajax :: AJAX | eff) (Either String (Array Artifact))
+voteUpArtifact resourceUrl = do
+    result <- put (resourceUrl ++ "/vote") ""
+    let reply = result.response
+    case readJSON reply of
+        Right artifacts -> return (Right artifacts)
+        Left _          -> return (Left "An error occured")
 
