@@ -1,19 +1,51 @@
 module ArtyFactory 
-    ( Artifact
+    ( AppEffects
+    , Artifact
     , Page
     , State
-    , Query
+    , Query (..)
     , initialState
     , ui
     ) where
 
 import Prelude
 
-import Halogen
+import Control.Monad.Aff (Aff ())
+import Data.Either (Either (..))
+import Data.Foreign
+import Data.Foreign.Class
+
+import Halogen (ComponentHTML, ComponentDSL, HalogenEffects, Component, Natural, component, modify, liftAff')
 import Halogen.HTML.Core (className)
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Events.Indexed as E
 import Halogen.HTML.Properties.Indexed as P
+
+import Network.HTTP.Affjax (AJAX (), get)
+
+--import Artifact (Artifact (..))
+
+-- | Record to describe one artifact.
+data Artifact
+    = Artifact
+      { resourceUrl :: String
+      , storageUrl  :: String
+      , rating      :: Int
+      }
+
+-- | IsForeign instance.
+instance foreignArtifact :: IsForeign Artifact where
+    read value = do
+        resourceUrl <- readProp "resourceUrl" value
+        storageUrl  <- readProp "storageUrl" value
+        rating      <- readProp "rating" value
+        return $ Artifact 
+              { resourceUrl: resourceUrl
+              , storageUrl: storageUrl
+              , rating: rating 
+              }
+
+type AppEffects eff = HalogenEffects (ajax :: AJAX | eff)
 
 data Page = Download | Upload
 
@@ -21,12 +53,6 @@ instance eqPage :: Eq Page where
     eq Download Download = true
     eq Upload Upload     = true
     eq _ _               = false
-
--- | The record for one artifact.
-type Artifact
-    = { resourceUrl :: String
-      , rating      :: Int
-      }
 
 -- | The state for the Arty-Factory.
 type State
@@ -38,21 +64,16 @@ type State
 data Query a
     = GotoDownload a
     | GotoUpload a
+    | Refresh a
 
 -- | The initial - empty - state for the ArtyFactory.
 initialState :: State
 initialState = { page: Download
-               , artifacts: [ { resourceUrl: "/storage/foo.tgz"
-                              , rating: 0 
-                              }
-                            , { resourceUrl: "/storage/bar.tgz"
-                              , rating: 2
-                              }
-                            ]
+               , artifacts: []
                }
 
 -- | The UI for the ArtyFactory.
-ui :: forall g. (Functor g) => Component State Query g
+ui :: forall eff. Component State Query (Aff (AppEffects eff))
 ui = component render eval
 
 -- | The composition of the UI rendering.
@@ -158,15 +179,15 @@ renderDownloadPane st =
       ]
 
 renderTableEntry :: Artifact -> ComponentHTML Query
-renderTableEntry art =
+renderTableEntry (Artifact art) =
     H.tr_
-      [ H.td_ [ H.text art.resourceUrl ]
+      [ H.td_ [ H.text art.storageUrl ]
       -- | TODO: Add the download attribute in Halogen.
       , H.td_ [ H.a [ P.href art.resourceUrl ]
                     [ H.span [ P.classes [ className "glyphicon"
                                          , className "glyphicon-download"
                                          ]
-                             , P.title $ "Download " ++ art.resourceUrl
+                             , P.title $ "Download " ++ art.storageUrl
                              ] []
                     ]
               ]
@@ -221,10 +242,26 @@ renderUploadPane st =
       --, H.p_ [ H.text "Olleh" ]
       --]
 
-eval :: forall g. (Functor g) => Natural Query (ComponentDSL State Query g)
+eval :: forall eff. Natural Query (ComponentDSL State Query (Aff (AppEffects eff)))
 eval (GotoDownload next) = do
     modify $ \st -> st { page = Download }
     pure next
 eval (GotoUpload next) = do
     modify $ \st -> st { page = Upload }
     pure next
+eval (Refresh next) = do
+    result <- liftAff' refreshArtifacts
+    case result of
+        Right artifacts -> do
+          modify $ \st -> st { artifacts = artifacts }
+          pure next
+        _              -> pure next
+
+refreshArtifacts :: forall eff. Aff (ajax :: AJAX | eff) (Either String (Array Artifact))
+refreshArtifacts = do
+    result <- get "/artifact"
+    let reply = result.response
+    case readJSON reply of
+        Right artifacts -> return (Right artifacts)
+        Left _          -> return (Left "An error occurred")
+
