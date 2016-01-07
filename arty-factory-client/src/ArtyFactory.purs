@@ -11,6 +11,7 @@ module ArtyFactory
 import Prelude
 
 import Control.Monad.Aff (Aff ())
+import Data.Array (reverse, sortBy)
 import Data.Either (Either (..))
 import Data.Foreign
 import Data.Foreign.Class
@@ -265,14 +266,14 @@ eval (Refresh next) = do
     result <- liftAff' refreshArtifacts
     case result of
         Right artifacts -> do
-          modify $ \st -> st { artifacts = artifacts }
+          modify $ \st -> st { artifacts = sortByRating artifacts }
           pure next
         _               -> pure next
 eval (VoteUp resourceUrl next) = do
     result <- liftAff' (voteUpArtifact resourceUrl)
     case result of
         Right artifacts -> do
-          modify $ \st -> st { artifacts = artifacts }
+          modify $ \st -> st { artifacts = sortByRating artifacts }
           pure next
         _               -> pure next
 
@@ -294,3 +295,10 @@ voteUpArtifact resourceUrl = do
         Right artifacts -> return (Right artifacts)
         Left _          -> return (Left "An error occured")
 
+-- | Sort an array of artifacts such that records come in decreasing
+-- rating order.
+sortByRating :: Array Artifact -> Array Artifact
+sortByRating = reverse <<< sortBy g
+    where
+      g :: Artifact -> Artifact -> Ordering
+      g (Artifact a1) (Artifact a2) = a1.rating `compare` a2.rating

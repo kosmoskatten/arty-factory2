@@ -1244,6 +1244,7 @@ function appendPatch(apply, patch) {
 "use strict";
 var Prelude = require("Prelude");
 var Control_Monad_Aff = require("Control.Monad.Aff");
+var Data_Array = require("Data.Array");
 var Data_Either = require("Data.Either");
 var Data_Foreign = require("Data.Foreign");
 var Data_Foreign_Class = require("Data.Foreign.Class");
@@ -1326,6 +1327,16 @@ var Artifact = (function () {
     };
     return Artifact;
 })();
+var sortByRating = (function () {
+    var g = function (v) {
+        return function (v1) {
+            return Prelude.compare(Prelude.ordInt)(v.value0.rating)(v1.value0.rating);
+        };
+    };
+    return function ($57) {
+        return Data_Array.reverse(Data_Array.sortBy(g)($57));
+    };
+})();
 var renderUploadPane = function (st) {
     return Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("container"), Halogen_HTML_Core.className("offset") ]) ])(Prelude.map(Prelude.functorArray)(function (s) {
         return Halogen_HTML_Elements.p_([ Halogen_HTML.text(s) ]);
@@ -1370,52 +1381,52 @@ var foreignArtifact = new Data_Foreign_Class.IsForeign(function (value) {
     });
 });
 var refreshArtifacts = Prelude.bind(Control_Monad_Aff.bindAff)(Network_HTTP_Affjax.get(Network_HTTP_Affjax_Response.responsableString)("/artifact"))(function (v) {
-    var $19 = Data_Foreign_Class.readJSON(Data_Foreign_Class.arrayIsForeign(foreignArtifact))(v.response);
-    if ($19 instanceof Data_Either.Right) {
-        return Prelude["return"](Control_Monad_Aff.applicativeAff)(new Data_Either.Right($19.value0));
+    var $25 = Data_Foreign_Class.readJSON(Data_Foreign_Class.arrayIsForeign(foreignArtifact))(v.response);
+    if ($25 instanceof Data_Either.Right) {
+        return Prelude["return"](Control_Monad_Aff.applicativeAff)(new Data_Either.Right($25.value0));
     };
-    if ($19 instanceof Data_Either.Left) {
+    if ($25 instanceof Data_Either.Left) {
         return Prelude["return"](Control_Monad_Aff.applicativeAff)(new Data_Either.Left("An error occurred"));
     };
-    throw new Error("Failed pattern match at ArtyFactory line 279, column 1 - line 281, column 1: " + [ $19.constructor.name ]);
+    throw new Error("Failed pattern match at ArtyFactory line 280, column 1 - line 282, column 1: " + [ $25.constructor.name ]);
 });
 var voteUpArtifact = function (resourceUrl) {
     return Prelude.bind(Control_Monad_Aff.bindAff)(Network_HTTP_Affjax.put(Network_HTTP_Affjax_Request.requestableString)(Network_HTTP_Affjax_Response.responsableString)(resourceUrl + "/vote")(""))(function (v) {
-        var $23 = Data_Foreign_Class.readJSON(Data_Foreign_Class.arrayIsForeign(foreignArtifact))(v.response);
-        if ($23 instanceof Data_Either.Right) {
-            return Prelude["return"](Control_Monad_Aff.applicativeAff)(new Data_Either.Right($23.value0));
+        var $29 = Data_Foreign_Class.readJSON(Data_Foreign_Class.arrayIsForeign(foreignArtifact))(v.response);
+        if ($29 instanceof Data_Either.Right) {
+            return Prelude["return"](Control_Monad_Aff.applicativeAff)(new Data_Either.Right($29.value0));
         };
-        if ($23 instanceof Data_Either.Left) {
+        if ($29 instanceof Data_Either.Left) {
             return Prelude["return"](Control_Monad_Aff.applicativeAff)(new Data_Either.Left("An error occured"));
         };
-        throw new Error("Failed pattern match at ArtyFactory line 288, column 1 - line 290, column 1: " + [ $23.constructor.name ]);
+        throw new Error("Failed pattern match at ArtyFactory line 289, column 1 - line 291, column 1: " + [ $29.constructor.name ]);
     });
 };
 var $$eval = function (v) {
     if (v instanceof GotoDownload) {
         return Prelude.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (st) {
-            var $27 = {};
-            for (var $28 in st) {
-                if (st.hasOwnProperty($28)) {
-                    $27[$28] = st[$28];
+            var $33 = {};
+            for (var $34 in st) {
+                if (st.hasOwnProperty($34)) {
+                    $33[$34] = st[$34];
                 };
             };
-            $27.page = Download.value;
-            return $27;
+            $33.page = Download.value;
+            return $33;
         }))(function () {
             return Prelude.pure(Control_Monad_Free.freeApplicative)(v.value0);
         });
     };
     if (v instanceof GotoUpload) {
         return Prelude.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (st) {
-            var $30 = {};
-            for (var $31 in st) {
-                if (st.hasOwnProperty($31)) {
-                    $30[$31] = st[$31];
+            var $36 = {};
+            for (var $37 in st) {
+                if (st.hasOwnProperty($37)) {
+                    $36[$37] = st[$37];
                 };
             };
-            $30.page = Upload.value;
-            return $30;
+            $36.page = Upload.value;
+            return $36;
         }))(function () {
             return Prelude.pure(Control_Monad_Free.freeApplicative)(v.value0);
         });
@@ -1424,14 +1435,14 @@ var $$eval = function (v) {
         return Prelude.bind(Control_Monad_Free.freeBind)(Halogen_Query["liftAff'"](Control_Monad_Aff_Class.monadAffAff)(refreshArtifacts))(function (v1) {
             if (v1 instanceof Data_Either.Right) {
                 return Prelude.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (st) {
-                    var $35 = {};
-                    for (var $36 in st) {
-                        if (st.hasOwnProperty($36)) {
-                            $35[$36] = st[$36];
+                    var $41 = {};
+                    for (var $42 in st) {
+                        if (st.hasOwnProperty($42)) {
+                            $41[$42] = st[$42];
                         };
                     };
-                    $35.artifacts = v1.value0;
-                    return $35;
+                    $41.artifacts = sortByRating(v1.value0);
+                    return $41;
                 }))(function () {
                     return Prelude.pure(Control_Monad_Free.freeApplicative)(v.value0);
                 });
@@ -1443,14 +1454,14 @@ var $$eval = function (v) {
         return Prelude.bind(Control_Monad_Free.freeBind)(Halogen_Query["liftAff'"](Control_Monad_Aff_Class.monadAffAff)(voteUpArtifact(v.value0)))(function (v1) {
             if (v1 instanceof Data_Either.Right) {
                 return Prelude.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (st) {
-                    var $41 = {};
-                    for (var $42 in st) {
-                        if (st.hasOwnProperty($42)) {
-                            $41[$42] = st[$42];
+                    var $47 = {};
+                    for (var $48 in st) {
+                        if (st.hasOwnProperty($48)) {
+                            $47[$48] = st[$48];
                         };
                     };
-                    $41.artifacts = v1.value0;
-                    return $41;
+                    $47.artifacts = sortByRating(v1.value0);
+                    return $47;
                 }))(function () {
                     return Prelude.pure(Control_Monad_Free.freeApplicative)(v.value1);
                 });
@@ -1458,7 +1469,7 @@ var $$eval = function (v) {
             return Prelude.pure(Control_Monad_Free.freeApplicative)(v.value1);
         });
     };
-    throw new Error("Failed pattern match at ArtyFactory line 257, column 1 - line 258, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at ArtyFactory line 258, column 1 - line 259, column 1: " + [ v.constructor.name ]);
 };
 var eqPage = new Prelude.Eq(function (v) {
     return function (v1) {
@@ -1473,38 +1484,38 @@ var eqPage = new Prelude.Eq(function (v) {
 });
 var renderNavbar = function (st) {
     var maybeRenderRefresh = (function () {
-        var $48 = Prelude["=="](eqPage)(st.page)(Download.value);
-        if ($48) {
+        var $54 = Prelude["=="](eqPage)(st.page)(Download.value);
+        if ($54) {
             return [ Halogen_HTML_Elements_Indexed.ul([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("nav"), Halogen_HTML_Core.className("navbar-nav"), Halogen_HTML_Core.className("navbar-right") ]) ])([ Halogen_HTML_Elements.li_([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href("#"), Halogen_HTML_Events_Indexed.onClick(Halogen_HTML_Events.input_(Refresh.create)) ])([ Halogen_HTML_Elements_Indexed.span([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("glyphicon"), Halogen_HTML_Core.className("glyphicon-refresh") ]) ])([  ]) ]) ]) ]) ];
         };
-        if (!$48) {
+        if (!$54) {
             return [  ];
         };
-        throw new Error("Failed pattern match at ArtyFactory line 123, column 7 - line 124, column 7: " + [ $48.constructor.name ]);
+        throw new Error("Failed pattern match at ArtyFactory line 124, column 7 - line 125, column 7: " + [ $54.constructor.name ]);
     })();
     var linkClass = function (page) {
-        var $49 = Prelude["=="](eqPage)(page)(st.page);
-        if ($49) {
+        var $55 = Prelude["=="](eqPage)(page)(st.page);
+        if ($55) {
             return [ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("active")) ];
         };
-        if (!$49) {
+        if (!$55) {
             return [  ];
         };
-        throw new Error("Failed pattern match at ArtyFactory line 98, column 1 - line 99, column 1: " + [ $49.constructor.name ]);
+        throw new Error("Failed pattern match at ArtyFactory line 99, column 1 - line 100, column 1: " + [ $55.constructor.name ]);
     };
     var renderLinks = [ Halogen_HTML_Elements_Indexed.li(linkClass(Download.value))([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href("#"), Halogen_HTML_Events_Indexed.onClick(Halogen_HTML_Events.input_(GotoDownload.create)) ])([ Halogen_HTML.text("Download") ]) ]), Halogen_HTML_Elements_Indexed.li(linkClass(Upload.value))([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.href("#"), Halogen_HTML_Events_Indexed.onClick(Halogen_HTML_Events.input_(GotoUpload.create)) ])([ Halogen_HTML.text("Upload") ]) ]) ];
     return Halogen_HTML_Elements_Indexed.nav([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("navbar"), Halogen_HTML_Core.className("navbar-inverse"), Halogen_HTML_Core.className("navbar-fixed-top") ]) ])([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("container-fluid")) ])([ Halogen_HTML_Elements_Indexed.div([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("navbar-header")) ])([ Halogen_HTML_Elements_Indexed.a([ Halogen_HTML_Properties_Indexed.class_(Halogen_HTML_Core.className("navbar-brand")), Halogen_HTML_Properties_Indexed.href("#") ])([ Halogen_HTML.text("Arty-Factory") ]) ]), Halogen_HTML_Elements.div_(Prelude["++"](Prelude.semigroupArray)([ Halogen_HTML_Elements_Indexed.ul([ Halogen_HTML_Properties_Indexed.classes([ Halogen_HTML_Core.className("nav"), Halogen_HTML_Core.className("navbar-nav") ]) ])(renderLinks) ])(maybeRenderRefresh)) ]) ]);
 };
 var render = function (st) {
     return Halogen_HTML_Elements.div_([ renderNavbar(st), (function () {
-        var $50 = Prelude["=="](eqPage)(st.page)(Download.value);
-        if ($50) {
+        var $56 = Prelude["=="](eqPage)(st.page)(Download.value);
+        if ($56) {
             return renderDownloadPane(st);
         };
-        if (!$50) {
+        if (!$56) {
             return renderUploadPane(st);
         };
-        throw new Error("Failed pattern match at ArtyFactory line 88, column 1 - line 89, column 1: " + [ $50.constructor.name ]);
+        throw new Error("Failed pattern match at ArtyFactory line 89, column 1 - line 90, column 1: " + [ $56.constructor.name ]);
     })() ]);
 };
 var ui = Halogen_Component.component(render)($$eval);
@@ -1519,7 +1530,7 @@ module.exports = {
     eqPage: eqPage
 };
 
-},{"Control.Monad.Aff":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Aff/index.js","Control.Monad.Aff.Class":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Aff.Class/index.js","Control.Monad.Free":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Free/index.js","Data.Either":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Either/index.js","Data.Foreign":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Foreign/index.js","Data.Foreign.Class":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Foreign.Class/index.js","Data.Foreign.Index":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Foreign.Index/index.js","Halogen":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen/index.js","Halogen.Component":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.Component/index.js","Halogen.HTML":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML/index.js","Halogen.HTML.Core":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Core/index.js","Halogen.HTML.Elements":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Elements/index.js","Halogen.HTML.Elements.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Elements.Indexed/index.js","Halogen.HTML.Events":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events/index.js","Halogen.HTML.Events.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Indexed/index.js","Halogen.HTML.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Indexed/index.js","Halogen.HTML.Properties.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Properties.Indexed/index.js","Halogen.Query":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.Query/index.js","Network.HTTP.Affjax":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Network.HTTP.Affjax/index.js","Network.HTTP.Affjax.Request":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Network.HTTP.Affjax.Request/index.js","Network.HTTP.Affjax.Response":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Network.HTTP.Affjax.Response/index.js","Prelude":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Prelude/index.js"}],"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Alt/index.js":[function(require,module,exports){
+},{"Control.Monad.Aff":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Aff/index.js","Control.Monad.Aff.Class":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Aff.Class/index.js","Control.Monad.Free":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Monad.Free/index.js","Data.Array":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Array/index.js","Data.Either":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Either/index.js","Data.Foreign":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Foreign/index.js","Data.Foreign.Class":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Foreign.Class/index.js","Data.Foreign.Index":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Data.Foreign.Index/index.js","Halogen":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen/index.js","Halogen.Component":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.Component/index.js","Halogen.HTML":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML/index.js","Halogen.HTML.Core":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Core/index.js","Halogen.HTML.Elements":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Elements/index.js","Halogen.HTML.Elements.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Elements.Indexed/index.js","Halogen.HTML.Events":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events/index.js","Halogen.HTML.Events.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Events.Indexed/index.js","Halogen.HTML.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Indexed/index.js","Halogen.HTML.Properties.Indexed":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.HTML.Properties.Indexed/index.js","Halogen.Query":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Halogen.Query/index.js","Network.HTTP.Affjax":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Network.HTTP.Affjax/index.js","Network.HTTP.Affjax.Request":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Network.HTTP.Affjax.Request/index.js","Network.HTTP.Affjax.Response":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Network.HTTP.Affjax.Response/index.js","Prelude":"/home/patrik/repos/arty-factory2/arty-factory-client/output/Prelude/index.js"}],"/home/patrik/repos/arty-factory2/arty-factory-client/output/Control.Alt/index.js":[function(require,module,exports){
 // Generated by psc version 0.8.0.0
 "use strict";
 var Prelude = require("Prelude");
