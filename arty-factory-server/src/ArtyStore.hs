@@ -7,6 +7,7 @@ module ArtyStore
     , insertArtifact
     , tryVoteUpArtifact
     , tryInsertFilename
+    , tryDeleteArtifact
     , mkFileWriter
     ) where
 
@@ -87,8 +88,9 @@ artifacts artyStore = Map.elems <$> readTVarIO (artyMap artyStore)
 -- | Insert a new artifact to the store.
 insertArtifact :: ResourceId -> Artifact -> ArtyStore -> IO ()
 insertArtifact resId art ArtyStore {..} =
-    atomically $
+    atomically $ do
       modifyTVar artyMap $ Map.insert resId art
+      writeTVar modified True
 
 -- | Try vote up the given artifact. If found the artifact is voted for
 -- and the value of True is returned. Otherwise the value of False is
@@ -102,6 +104,7 @@ tryVoteUpArtifact artId ArtyStore {..} = atomically go
       if Map.member artId artyMap'
          then do writeTVar artyMap $
                      Map.update (Just . incRating) artId artyMap'
+                 writeTVar modified True
                  return True
          else return False
 
@@ -118,6 +121,9 @@ tryInsertFilename file ArtyStore {..} = atomically go
          then do writeTVar fileSet $ Set.insert file fileSet'
                  return True
          else return False
+
+tryDeleteArtifact :: Text -> ArtyStore -> IO Bool
+tryDeleteArtifact = undefined
 
 mkFileWriter :: FilePath -> ArtyStore -> IO (ByteString -> IO ())
 mkFileWriter file ArtyStore {..} = do

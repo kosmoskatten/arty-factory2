@@ -4,6 +4,7 @@ module Handler
     ( listArtifacts
     , uploadFile
     , voteUp
+    , deleteFile
     ) where
 
 --import Data.Text (Text)
@@ -18,6 +19,7 @@ import ArtyStore ( artifacts
                  , insertArtifact
                  , tryVoteUpArtifact
                  , tryInsertFilename
+                 , tryDeleteArtifact
                  , mkFileWriter
                  )
 import Context ( Context (..))
@@ -67,3 +69,11 @@ voteUp context = do
     found <- liftIO $ tryVoteUpArtifact artId (artyStore context)
     if found then listArtifacts context
              else respondText NotFound "Artifact not found"
+
+-- | Delete an artifact and its associated file.
+deleteFile :: Context -> Handler HandlerResponse
+deleteFile context = do
+    artId   <- capture "artId"
+    deleted <- liftIO $ tryDeleteArtifact artId (artyStore context)
+    if deleted then listArtifacts context
+               else respondText Ok "Deleted"
