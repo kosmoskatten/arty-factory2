@@ -4,22 +4,37 @@ module Main
     ) where
 
 import Network.Hive
+import Options
 
 import ArtyStore (initFromDirectory)
 import Context (Context (..))
 import Handler (listArtifacts, uploadFile, voteUp)
 
+data ServerOptions
+    = ServerOptions
+      { listenPortOpt :: !Int
+      , siteDirOpt    :: !FilePath
+      , storageDirOpt :: !FilePath
+      }
+
+instance Options ServerOptions where
+    defineOptions = pure ServerOptions
+        <*> simpleOption "port" 80 "Server listening port"
+        <*> simpleOption "site-dir" "/opt/arty-factory" "Site directory"
+        <*> simpleOption "storage-dir" "/opt/arty-factory"
+                       "Storage directory"
+
 main :: IO ()
-main = do
-    eArtyStore <- initFromDirectory "/home/patrik/slask/arty"
+main = runCommand $ \opts _ -> do
+    eArtyStore <- initFromDirectory (storageDirOpt opts)
     case eArtyStore of
         Right artyStore' -> do
             let context = Context
-                          { siteDir   = "site"
-                          , storeDir  = "/home/patrik/slask/arty"
+                          { siteDir   = siteDirOpt opts
+                          , storeDir  = storageDirOpt opts
                           , artyStore = artyStore'
                           }
-            runServer context 8888
+            runServer context (listenPortOpt opts)
 
         Left err         -> putStrLn $ "Error: " ++ err
 
@@ -56,3 +71,4 @@ runServer context serverPort = do
 
         -- Rule 6. Default rule which will serve the siteDir.
         matchAll           ==> serveDirectory (siteDir context)
+

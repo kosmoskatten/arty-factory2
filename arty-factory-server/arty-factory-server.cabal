@@ -32,6 +32,7 @@ executable arty-factory-server
                      , filepath
                      , hashable
                      , hive
+                     , options
                      , pipes
                      , stm
                      , text
