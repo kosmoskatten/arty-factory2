@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
 module Handler
     ( listArtifacts
     , uploadFile
@@ -28,7 +27,7 @@ import ResourceId (mkResourceId)
 -- | List all artifacts.
 listArtifacts :: Context -> Handler HandlerResponse
 listArtifacts context =
-    respondJSON Ok =<< (liftIO $ artifacts (artyStore context))
+    respondJSON Ok =<< liftIO ( artifacts (artyStore context))
 
 -- | Upload a new file to the store and create a new meta data entry
 -- in the database.
@@ -41,17 +40,19 @@ uploadFile context = do
           if inserted then do transferFile file context
                               mkArtifact file context
                               respondJSON Created =<<
-                                  (liftIO $ artifacts (artyStore context))
+                                  liftIO (artifacts (artyStore context))
                       else respondText Conflict "File already exist"
 
         Nothing   -> respondText BadRequest "Missing file as query param"
 
+-- | Stream the the body to the file storage using the file writer pipe.
 transferFile :: Text -> Context -> Handler ()
 transferFile file context = do
     stream <- bodyStream
     writer <- liftIO $ mkFileWriter (T.unpack file) (artyStore context)
     liftIO $ runEffect $ P.mapM_ writer <-< stream
 
+-- | Make and insert an artifact into the meta store.
 mkArtifact :: Text -> Context -> Handler ()
 mkArtifact file context = do
     resourceId <- liftIO $ mkResourceId file
@@ -76,4 +77,5 @@ deleteFile context = do
     artId   <- capture "artId"
     deleted <- liftIO $ tryDeleteArtifact artId (artyStore context)
     if deleted then listArtifacts context
-               else respondText Ok "Deleted"
+               else respondText NotFound "Artifact not found"
+

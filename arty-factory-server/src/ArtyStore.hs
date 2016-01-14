@@ -26,8 +26,11 @@ import Data.ByteString (ByteString)
 import Data.Map.Lazy (Map)
 import Data.Set (Set)
 import Data.Text (Text)
-import System.Directory (createDirectoryIfMissing, doesFileExist)
-import System.FilePath ((</>))
+import System.Directory ( createDirectoryIfMissing
+                        , doesFileExist
+                        , removeFile
+                        )
+import System.FilePath ((</>), takeFileName)
 
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as LBS
@@ -122,9 +125,33 @@ tryInsertFilename file ArtyStore {..} = atomically go
                  return True
          else return False
 
-tryDeleteArtifact :: Text -> ArtyStore -> IO Bool
-tryDeleteArtifact = undefined
+-- | Try to delete an artifact and its associated storage. If the resource
+-- is found the value of True is returned, otherwise False.
+tryDeleteArtifact :: ResourceId -> ArtyStore -> IO Bool
+tryDeleteArtifact artId ArtyStore {..} = do
+    mArtifact <- atomically go
+    case mArtifact of
+        Just artifact -> do
+            let fullPath = storageDir </>
+                              takeFileName (T.unpack $ storageUrl artifact)
+            removeFile fullPath
+            return True
+        Nothing       -> return False
+    where
+      go :: STM (Maybe Artifact)
+      go = do
+        artyMap' <- readTVar artyMap
+        case Map.lookup artId artyMap' of
+            Just artifact -> do
+                writeTVar artyMap $ Map.delete artId artyMap'
+                writeTVar modified True
+                modifyTVar fileSet $
+                  Set.delete (takeFileNameText $ storageUrl artifact)
+                return (Just artifact)
+            Nothing       -> return Nothing
 
+-- | Make a file writer function which is carrying the file path in its
+-- closure.
 mkFileWriter :: FilePath -> ArtyStore -> IO (ByteString -> IO ())
 mkFileWriter file ArtyStore {..} = do
     let fullPath = storageDir </> file
@@ -175,3 +202,6 @@ metaStoreFile = "metastore.json"
 
 storageDirName :: FilePath
 storageDirName = "storage"
+
+takeFileNameText :: Text -> Text
+takeFileNameText = T.pack . takeFileName . T.unpack
